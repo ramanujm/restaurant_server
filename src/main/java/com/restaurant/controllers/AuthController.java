@@ -6,13 +6,11 @@ import com.restaurant.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
@@ -21,7 +19,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @RequestMapping("/signup")
+    @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequest signupRequest){
         UserDto createdUserDto = authService.createUser(signupRequest);
 
