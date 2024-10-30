@@ -2,6 +2,8 @@ package com.restaurant.configurations;
 
 import com.restaurant.services.jwt.UserService;
 import com.restaurant.util.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,11 +23,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
-    private final UserService userService;
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -35,12 +40,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = null;
         String userEmail = null;
 
-        if(authHeader != null || !StringUtils.startsWith(authHeader, "Bearer")) {
-            jwt = authHeader.substring(7);
-            userEmail = jwtUtil.extractUserName(jwt);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logger.warn("Authorization header is not there or does not start with Bearer");
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        if(StringUtils.isNoneEmpty(userEmail) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if(authHeader != null || !StringUtils.startsWith(authHeader, "Bearer")) {
+            jwt = authHeader.substring(7);
+
+            try{
+                userEmail = jwtUtil.extractUserName(jwt);
+            }
+            catch(IllegalStateException e) {logger.error("Error extracting username from token");}
+            catch(ExpiredJwtException e) {logger.error("Token has expired");}
+            catch(MalformedJwtException e) {logger.error("Token is malformed");}
+            catch(Exception e) {logger.error("An error occurred while extracting username from token");}
+
+        }
+
+        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.UserDetailsService().loadUserByUsername(userEmail);
 
             if(jwtUtil.isTokenValid(jwt, userDetails)) {

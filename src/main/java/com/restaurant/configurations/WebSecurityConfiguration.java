@@ -26,12 +26,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 
-//.authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**")
 public class WebSecurityConfiguration {
-    private static final String[] WHITE_LIST_URL = {
-        "/api/v1/auth/**", "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
-        "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**", "/webjars/**",
-        "/swagger-ui.html", "/api/auth/**", "/api/test/**", "/authenticate", "/api/admin/**"
+    private static final String[] SWAGGER_WHITELIST= {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            "/file/*",
+            "/error/*",
+            "/"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
@@ -58,15 +64,16 @@ public class WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**")
-                                                     .permitAll()
-                                                     .requestMatchers("/api/admin/**")
-                                                     .hasAnyAuthority(UserRole.ADMIN.name())
-                                                     .anyRequest()
-                                                     .authenticated())
-            .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**")
+                        .permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers("/api/admin/**")
+                        .hasAnyAuthority(UserRole.ADMIN.name())
+                        .anyRequest()
+                        .authenticated())
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(authenticationProvider());
 
         return http.build();
     }

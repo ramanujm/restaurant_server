@@ -4,15 +4,16 @@ import com.restaurant.dtos.CategoryDto;
 import com.restaurant.entities.Category;
 import com.restaurant.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
-@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService{
 
-    private final CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Override
     public CategoryDto addCategory(CategoryDto categoryDto) throws IOException {

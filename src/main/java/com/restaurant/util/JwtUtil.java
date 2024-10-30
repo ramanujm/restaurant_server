@@ -18,7 +18,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    public static final String SECRET = "a5Yqtkoh+MSghPYqV/NuAixPynD4kqTL10IALK8YIew=";
+    public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
 //    public String generateToken(String email) {
 //        Map<String, Object> claims = new HashMap<>();
