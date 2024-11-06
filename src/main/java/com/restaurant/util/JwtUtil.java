@@ -20,35 +20,21 @@ public class JwtUtil {
 
     public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
-//    public String generateToken(String email) {
-//        Map<String, Object> claims = new HashMap<>();
-//        return  generateToken(claims, email);
-//    }
-//
-//    private String createToken(Map<String, Object> claims, String email) {
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setSubject(email)
-//                .setIssuedAt(new Date(System.currentTimeMillis()))
-//                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60))
-//                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
-//    }
-
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return  generateToken(new HashMap<>(), userDetails);
+        return  doGenerateToken(claims, userDetails);
     }
 
-    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    private String doGenerateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*24))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*24)) // Token will expire in 1 hour
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
     }
 
-    private Key getSignKey() {
+    private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -77,9 +63,9 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(getSignInKey())
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
 }

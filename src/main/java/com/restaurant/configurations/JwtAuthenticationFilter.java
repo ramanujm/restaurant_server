@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-        String jwt = null;
+        String jwtToken = null;
         String userEmail = null;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -45,24 +45,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
-        if(authHeader != null || !StringUtils.startsWith(authHeader, "Bearer")) {
-            jwt = authHeader.substring(7);
-
-            try{
-                userEmail = jwtUtil.extractUserName(jwt);
-            }
-            catch(IllegalStateException e) {logger.error("Error extracting username from token");}
-            catch(ExpiredJwtException e) {logger.error("Token has expired");}
-            catch(MalformedJwtException e) {logger.error("Token is malformed");}
-            catch(Exception e) {logger.error("An error occurred while extracting username from token");}
-
+        try {
+            jwtToken = authHeader.substring(7);
+            userEmail = jwtUtil.extractUserName(jwtToken);
+        } catch (IllegalStateException e) {
+            logger.error("Error extracting username from token");
+        } catch (ExpiredJwtException e) {
+            logger.error("Token has expired");
+        } catch (MalformedJwtException e) {
+            logger.error("Token is malformed");
+        } catch (Exception e) {
+            logger.error("An error occurred while extracting username from token");
         }
+
 
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.UserDetailsService().loadUserByUsername(userEmail);
 
-            if(jwtUtil.isTokenValid(jwt, userDetails)) {
+            if(jwtUtil.isTokenValid(jwtToken, userDetails)) {
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

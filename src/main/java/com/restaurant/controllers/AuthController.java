@@ -57,6 +57,7 @@ public class AuthController {
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest, HttpServletResponse response) throws IOException {
 
+        System.out.println("test method");
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword()));
         }catch (BadCredentialsException e) {
