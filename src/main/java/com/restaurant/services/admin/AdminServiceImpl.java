@@ -63,4 +63,23 @@ public class AdminServiceImpl implements AdminService{
         }
         return null;
     }
+
+    @Override
+    public List<ProductDto> getAllProductsByCategory(Long categoryId) {
+        return productRepository.findAllByCategoryId(categoryId).stream().map(Product:: getProductDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDto> getProductsByCategoryAndTitle(Long categoryId, String title) {
+        return productRepository.findAllByCategoryIdAndNameContaining(categoryId, title).stream().map(Product:: getProductDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteProduct(Long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if(optionalProduct.isPresent()) {
+            productRepository.deleteById(productId);
+        }
+        throw  new IllegalArgumentException("Product with Id:" + productId + "not found");
+    }
 }

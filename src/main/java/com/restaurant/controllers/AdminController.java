@@ -48,7 +48,7 @@ public class AdminController {
         return ResponseEntity.ok(categoryDtoList);
     }
 
-    // Product Operation
+    // Product Operations
 
     @PostMapping("/{categoryId}/product")
     public ResponseEntity<?> postProduct(@PathVariable Long categoryId, @ModelAttribute ProductDto productDto) throws IOException {
@@ -58,6 +58,31 @@ public class AdminController {
         }
         return  ResponseEntity.status(HttpStatus.CREATED).body(createdProductDto);
     }
+
+    @GetMapping("/{categoryId}/products")
+    public ResponseEntity<List<ProductDto>> getAllProductsByCategory(@PathVariable Long categoryId) {
+        List<ProductDto> productDtoList = adminService.getAllProductsByCategory(categoryId);
+        if (productDtoList == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productDtoList);
+    }
+
+    @GetMapping("/{categoryId}/product/{title}")
+    public ResponseEntity<List<ProductDto>> getProductsByCategoryAndTitle(@PathVariable Long categoryId, @PathVariable String title) {
+        List<ProductDto> productDtoList = adminService.getProductsByCategoryAndTitle(categoryId, title);
+        if (productDtoList == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productDtoList);
+    }
+
+    @DeleteMapping("/product/{productId}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
+        adminService.deleteProduct(productId);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }
