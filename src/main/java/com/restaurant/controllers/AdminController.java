@@ -2,6 +2,7 @@ package com.restaurant.controllers;
 
 import com.restaurant.dtos.CategoryDto;
 import com.restaurant.dtos.ProductDto;
+import com.restaurant.dtos.ReservationDto;
 import com.restaurant.services.admin.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -81,6 +82,42 @@ public class AdminController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
         adminService.deleteProduct(productId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<ProductDto> getProductsById(@PathVariable Long productId) {
+        ProductDto productDto = adminService.getProductsById(productId);
+        if (productDto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productDto);
+    }
+
+    @PutMapping("/product/{productId}")
+    public ResponseEntity<?> updateProduct(@PathVariable Long productId, @ModelAttribute ProductDto productDto) throws IOException {
+        ProductDto updateProductDto = adminService.updateProduct(productId, productDto);
+        if(updateProductDto == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
+        }
+        return  ResponseEntity.status(HttpStatus.OK).body(updateProductDto);
+    }
+
+    @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationDto>> getReservations() {
+        List<ReservationDto> reservationDtoList = adminService.getReservations();
+        if (reservationDtoList == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(reservationDtoList);
+    }
+
+    @GetMapping("/reservations/{reservationId}/{status}")
+    public ResponseEntity<ReservationDto> changeReservationStatus(@PathVariable Long reservationId, @PathVariable String status) {
+        ReservationDto updatedReservationDto = adminService.changeReservationStatus(reservationId, status);
+        if (updatedReservationDto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updatedReservationDto);
     }
 
 
